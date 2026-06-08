@@ -1,12 +1,8 @@
 {
-  "version": 3,
-  "build": {
-    "baseDirectory": "my-project",
-    "command": "npm run build",
-    "outputDirectory": "dist"
-  },
-  "routes": [
-    { "handle": "filesystem" },
-    { "src": "/.*", "dest": "/index.html" }
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
   ]
 }

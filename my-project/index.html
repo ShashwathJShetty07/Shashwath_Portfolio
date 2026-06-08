@@ -1,12 +1,260 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Shashwath J Shetty — Portfolio</title>
+  <meta name="description" content="Portfolio — Shashwath J Shetty | Full Stack Developer" />
+  <style>
+    :root{
+      --bg:#0B0F19; --primary:#6C63FF; --secondary:#00D4FF; --accent:#A855F7; --text:#FFFFFF;
+      --glass: rgba(255,255,255,0.05); --glass-2: rgba(255,255,255,0.03);
+      --card-blur: 12px; --max-width:1100px; --radius:14px; --glass-border: rgba(255,255,255,0.06);
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    /* Reset */
+    *{box-sizing:border-box;margin:0;padding:0}html,body{height:100%}
+    body{font-family:var(--sans);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+    /* Loading overlay */
+    #loader{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#04050a,rgba(11,15,25,0.9));z-index:9999;transition:opacity .6s ease,visibility .6s;}
+    #loader.hide{opacity:0;visibility:hidden}
+    .spinner{width:72px;height:72px;border-radius:50%;background:linear-gradient(90deg,var(--primary),var(--secondary));filter:blur(8px);position:relative}
+    .spinner:after{content:"";position:absolute;inset:8px;border-radius:50%;background:var(--bg);}
+
+    /* Scroll progress */
+    #progress{position:fixed;left:0;top:0;height:4px;background:linear-gradient(90deg,var(--secondary),var(--primary));width:0%;z-index:999}
+
+    /* Cursor */
+    .cursor, .cursor-follower{position:fixed;left:0;top:0;pointer-events:none;border-radius:50%;transform:translate(-50%,-50%);mix-blend-mode:screen}
+    .cursor{width:8px;height:8px;background:var(--text);z-index:9999}
+    .cursor-follower{width:60px;height:60px;background:radial-gradient(circle at 30% 30%, rgba(108,99,255,0.18), rgba(0,212,255,0.06));z-index:9998;filter:blur(18px)}
+
+    /* Mouse glow overlay */
+    .mouse-glow{position:fixed;inset:auto;left:0;top:0;width:100vw;height:100vh;pointer-events:none;z-index:1;background:radial-gradient(600px 400px at var(--mx) var(--my), rgba(108,99,255,0.08), transparent)}
+
+    /* Navbar */
+    header{position:fixed;top:16px;left:50%;transform:translateX(-50%);width:calc(100% - 64px);max-width:var(--max-width);z-index:999;padding:8px 16px;display:flex;align-items:center;justify-content:space-between}
+    .brand{display:flex;gap:14px;align-items:center}
+    .brand .logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--bg);box-shadow:0 6px 24px rgba(108,99,255,0.12)}
+    nav{display:flex;gap:12px;align-items:center}
+    nav a{color:rgba(255,255,255,0.7);padding:8px 12px;border-radius:10px;text-decoration:none;font-weight:600;transition:all .25s}
+    nav a:hover{color:var(--text);background:linear-gradient(90deg,rgba(108,99,255,0.08),rgba(168,85,247,0.04));backdrop-filter: blur(6px)}
+    nav a.active{color:var(--primary);box-shadow:0 6px 24px rgba(108,99,255,0.08)}
+    .menu-toggle{display:none;border:none;background:rgba(255,255,255,0.06);color:var(--text);font-size:20px;padding:10px 14px;border-radius:12px;cursor:pointer;backdrop-filter: blur(8px)}
+    .mobile-menu{position:fixed;inset:0;background:rgba(11,15,25,0.98);backdrop-filter:blur(16px);padding:120px 24px 24px;z-index:1005;display:none;flex-direction:column;gap:24px}
+    .mobile-menu.open{display:flex}
+    .mobile-menu a{color:var(--text);font-size:18px;padding:18px 20px;border-radius:14px;background:rgba(255,255,255,0.04);text-decoration:none;transition:background .25s}
+    .mobile-menu a:hover{background:rgba(108,99,255,0.15)}
+    .mobile-menu button{position:absolute;top:28px;right:24px;border:none;background:transparent;color:var(--text);font-size:30px;cursor:pointer}
+
+    /* Welcome overlay */
+    #welcome{position:fixed;inset:0;background:linear-gradient(180deg, rgba(6,8,15,0.9), rgba(11,15,25,0.95));display:flex;align-items:center;justify-content:center;flex-direction:column;z-index:9990;padding:24px}
+    #welcome .title{font-size:clamp(28px,6vw,40px);letter-spacing:1px;color:var(--text);opacity:0;transform:translateY(12px);transition:all .8s cubic-bezier(.2,.9,.3,1)}
+    #welcome.show .title{opacity:1;transform:none}
+    #welcome h1{font-weight:700;font-size:clamp(44px,8vw,84px);margin-top:8px;background:linear-gradient(90deg,var(--primary),var(--secondary));-webkit-background-clip:text;background-clip:text;color:transparent}
+    .typing{margin-top:8px;font-size:18px;color:rgba(255,255,255,0.82);height:28px}
+    .enter-btn{margin-top:28px;padding:14px 28px;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:12px;color:var(--bg);font-weight:700;border:none;cursor:pointer;box-shadow:0 12px 40px rgba(108,99,255,0.16)}
+    .enter-btn:hover{transform:translateY(-3px)}
+
+    /* Main layout */
+    main{position:relative;z-index:10;max-width:var(--max-width);margin:140px auto;padding:40px 28px}
+    .section{margin:60px 0;padding:28px;border-radius:var(--radius);backdrop-filter: blur(var(--card-blur));background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border:1px solid var(--glass-border);box-shadow:0 8px 40px rgba(3,6,20,0.6)}
+
+    /* Hero */
+    .hero{display:flex;gap:40px;align-items:center;justify-content:space-between}
+    .hero-left{flex:1;display:flex;flex-direction:column;justify-content:center}
+    .hero-right{width:360px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+    .profile-wrap{position:relative;width:260px;height:260px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto}
+    .profile-mask{position:absolute;inset:12px;border-radius:50%;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);box-shadow:inset 0 1px 0 rgba(255,255,255,0.02)}
+    .profile{width:220px;height:220px;border-radius:50%;overflow:hidden;display:block;position:relative;z-index:2}
+    .profile img{width:100%;height:100%;object-fit:cover;object-position:center top;:block;filter:contrast(1.02)}
+    /* rotating gradient border */
+    .ring{position:absolute;inset:0;border-radius:50%;padding:6px;background:conic-gradient(from 0deg,var(--primary),var(--accent),var(--secondary));mask:linear-gradient(#000,#000) content-box,linear-gradient(#000,#000);-webkit-mask-composite: xor;mask-composite:exclude;animation:spin 8s linear infinite;z-index:1}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .profile-float{animation:float 6s ease-in-out infinite}
+    @keyframes float{0%{transform:translateY(0)}50%{transform:translateY(-12px)}100%{transform:translateY(0)}}
+    .glow{position:absolute;inset:-18px;border-radius:50%;background:radial-gradient(circle at 30% 30%, rgba(108,99,255,0.18), transparent 30%);filter:blur(28px);z-index:0}
+
+    .hero h2{font-size:28px;margin-bottom:8px}
+    .hero p{color:rgba(255,255,255,0.75);line-height:1.6}
+    .socials{display:flex;gap:12px;margin-top:16px}
+    .btn{display:inline-flex;gap:10px;align-items:center;padding:10px 14px;border-radius:10px;background:linear-gradient(90deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.03);color:var(--text);text-decoration:none;font-weight:700}
+    .btn.primary{background:linear-gradient(90deg,var(--primary),var(--accent));color:var(--bg)}
+    .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04)}
+
+    /* About + two-column layout */
+    .cols{display:grid;grid-template-columns:1fr 360px;gap:28px}
+    .glass-card{padding:18px;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border:1px solid var(--glass-border)}
+    .section h3{font-size:30px;margin-bottom:18px}
+    .section p{line-height:1.75;color:rgba(255,255,255,0.78)}
+    .section-title{display:inline-flex;padding:4px 14px;border-radius:999px;background:rgba(108,99,255,0.12);color:var(--secondary);font-weight:700;font-size:13px;letter-spacing:0.06em;text-transform:uppercase}
+
+    /* Timeline */
+    .timeline{position:relative;padding-left:36px}
+    .timeline:before{content:"";position:absolute;left:12px;top:0;bottom:0;width:2px;background:linear-gradient(180deg,var(--primary),var(--secondary));opacity:0.18}
+    .tl-item{position:relative;margin-bottom:28px;padding:8px 12px;border-radius:10px}
+    .tl-item .dot{position:absolute;left:-24px;top:8px;width:12px;height:12px;border-radius:50%;background:var(--primary);box-shadow:0 6px 20px rgba(108,99,255,0.12)}
+
+    /* Skills */
+    .skills-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:16px}
+    .skill{padding:14px;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);display:flex;flex-direction:column;gap:10px}
+    .skill .bar{height:10px;border-radius:20px;background:rgba(255,255,255,0.06);overflow:hidden}
+    .skill .bar > i{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--secondary),var(--primary));transition:width 1.4s cubic-bezier(.2,.9,.3,1)}
+
+    /* Projects */
+    .projects{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
+    .project{position:relative;padding:16px;border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);overflow:hidden;border:1px solid rgba(255,255,255,0.04);transition:transform .35s,box-shadow .35s}
+    .project:hover{transform:translateY(-8px) rotateX(6deg);box-shadow:0 30px 80px rgba(0,0,0,0.6)}
+    .project:before{content:"";position:absolute;inset:-2px;border-radius:16px;padding:2px;background:conic-gradient(from 90deg,var(--primary),var(--accent),var(--secondary));-webkit-mask:linear-gradient(#000,#000) content-box,linear-gradient(#000,#000);mask-composite:exclude;opacity:0.85}
+    .techs{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    .badge{padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.03);font-weight:700;font-size:13px}
+
+    /* Counters */
+    .counters{display:flex;gap:18px;flex-wrap:wrap}
+    .counter{flex:1;min-width:160px;padding:18px;border-radius:12px;text-align:center}
+    .counter strong{display:block;font-size:28px;color:var(--primary)}
+
+    /* Contact */
+    form{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    form input, form textarea{padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--text);resize:none}
+    form textarea{grid-column:1/-1;height:120px}
+    .contact-side{display:flex;flex-direction:column;gap:10px}
+
+    footer{padding:24px;text-align:center;color:rgba(255,255,255,0.6)}
+
+    /* AOS-like animations */
+    [data-aos]{opacity:0;transform:translateY(20px);transition:all .9s cubic-bezier(.2,.9,.3,1)}
+    [data-aos].aos-animate{opacity:1;transform:none}
+    [data-aos="fade-left"]{transform:translateX(-26px)}
+    [data-aos="fade-right"]{transform:translateX(26px)}
+    [data-aos="zoom-in"]{transform:scale(.96)}
+
+    /* Back to top */
+    #topBtn{position:fixed;right:18px;bottom:18px;padding:12px;border-radius:12px;background:linear-gradient(90deg,var(--primary),var(--secondary));border:none;color:var(--bg);cursor:pointer;box-shadow:0 12px 30px rgba(108,99,255,0.12)}
+
+    /* Responsive */
+    @media (max-width:900px){.hero{flex-direction:column-reverse}.cols{grid-template-columns:1fr}.hero-right{width:240px}.profile-wrap{width:200px;height:200px}.hero-left{text-align:center}}
+    @media (max-width:520px){nav{display:none}.menu-toggle{display:block}.brand .logo{width:40px;height:40px}.hero-right{width:200px}.profile{width:180px;height:180px}.main{padding:20px}}
+
+  </style>
 </head>
 <body>
-  <div id="root"></div>
-  <script type="module" src="/src/main.jsx"></script>
-</body>
-</html>
+  <div id="progress"></div>
+  <div id="loader"><div class="spinner"></div></div>
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-follower" id="cursorF"></div>
+  <div class="mouse-glow" id="mglow"></div>
+
+  <header>
+    <div class="brand">
+      <div class="logo">SJ</div>
+      <div style="display:flex;flex-direction:column">
+        <strong style="font-size:14px">Shashwath J Shetty</strong>
+        <small style="color:rgba(255,255,255,0.5);font-size:12px">Full Stack Developer</small>
+      </div>
+    </div>
+    <nav id="nav">
+      <a href="#hero" class="active">Home</a>
+      <a href="#about">About</a>
+      <a href="#education">Education</a>
+      <a href="#skills">Skills</a>
+      <a href="#projects">Projects</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <button id="menuToggle" class="menu-toggle" aria-label="Open navigation menu">☰</button>
+  </header>
+  <div id="mobileMenu" class="mobile-menu" aria-hidden="true">
+    <button id="menuClose" aria-label="Close menu">✕</button>
+    <a href="#hero">Home</a>
+    <a href="#about">About</a>
+    <a href="#education">Education</a>
+    <a href="#skills">Skills</a>
+    <a href="#projects">Projects</a>
+    <a href="#contact">Contact</a>
+  </div>
+
+  <section id="welcome">
+    <div class="title">Welcome</div>
+    <h1>I'm Shashwath J Shetty</h1>
+    <div class="typing" id="typing"></div>
+    <button class="enter-btn" id="enter">Enter Portfolio</button>
+  </section>
+
+  <main>
+    <section id="hero" class="section" data-aos="zoom-in">
+      <div class="hero">
+        <div class="hero-left">
+          <h2>Hello, I'm <span style="background:linear-gradient(90deg,var(--primary),var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent;">Shashwath J Shetty</span></h2>
+          <p>Computer Science Engineering Student | Full Stack Developer | Software Enthusiast</p>
+
+          <div class="socials" style="margin-top:20px">
+            <a class="btn ghost" href="mailto:shashwathjshetty@gmail.com">Email</a>
+            <a class="btn ghost" href="tel:+918792018224">Call</a>
+            <a class="btn" target="_blank" href="https://github.com/ShashwathJShetty07">GitHub</a>
+            <a class="btn" target="_blank" href="https://linkedin.com/in/shashwath-j-shetty">LinkedIn</a>
+          </div>
+
+          <div style="margin-top:22px;display:flex;gap:12px">
+            <a class="btn primary" id="downloadResume">Download Resume</a>
+            <a class="btn ghost" href="#contact">Hire Me</a>
+          </div>
+        </div>
+
+        <aside class="hero-right">
+          <div class="profile-wrap">
+            <div class="ring"></div>
+            <div class="glow"></div>
+            <div class="profile-float profile-mask"></div>
+            <div class="profile"><img src="src/images/myimage.jpeg" alt="Profile"></div>
+          </div>
+          <div style="margin-top:18px;text-align:center;color:rgba(255,255,255,0.8)">
+            <div style="font-weight:800">Shashwath J Shetty</div>
+            <div style="font-size:13px;color:rgba(255,255,255,0.6)">Computer Science Engineer • Full Stack Developer</div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="about" class="section" data-aos="fade-up">
+      <div class="cols">
+        <div>
+          <span class="section-title">About</span>
+          <h3>About Me</h3>
+          <p>I am pursuing B.Tech in Computer Science & Engineering at NMAM Institute of Technology, Nitte. Passionate about building efficient, scalable systems and delightful user experiences. I love full-stack development, machine learning experiments, and solving real-world problems.</p>
+
+          <div style="margin-top:14px" class="counters">
+            <div class="counter glass-card">
+              <strong data-counter data-target="4">0</strong>
+              <small>Years Learning</small>
+            </div>
+            <div class="counter glass-card">
+              <strong data-counter data-target="10">0</strong>
+              <small>Projects</small>
+            </div>
+            <div class="counter glass-card">
+              <strong data-counter data-target="1">0</strong>
+              <small>Internships</small>
+            </div>
+          </div>
+        </div>
+        <aside>
+          <div class="glass-card">
+            <h4>Contact</h4>
+            <p><strong>Email:</strong> shashwathjshetty@gmail.com</p>
+            <p><strong>Phone:</strong> +91 8792018224</p>
+            <p style="margin-top:8px"><a class="btn" href="#contact">Send Message</a></p>
+          </div>
+
+          <div style="margin-top:12px" class="glass-card">
+            <h4>Activities</h4>
+            <ul style="list-style:none;padding-left:0;margin-top:8px;color:rgba(255,255,255,0.75)">
+              <li>ACE Member</li><li>Hacker Club</li><li>Earth Club</li><li>Finite Loop Club</li><li>NSS Volunteer</li>
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="education" class="section" data-aos="fade-right">
+      <span class="section-title">Education</span>

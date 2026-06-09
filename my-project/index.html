@@ -49,9 +49,10 @@
     .mobile-menu a:hover{background:rgba(108,99,255,0.15)}
     .mobile-menu button{position:absolute;top:28px;right:24px;border:none;background:transparent;color:var(--text);font-size:30px;cursor:pointer;z-index:1007}
 
-    /* Welcome overlay - FIXED: now has opacity and visibility transitions, pointer-events controlled */
-    #welcome{position:fixed;inset:0;background:linear-gradient(180deg, rgba(6,8,15,0.9), rgba(11,15,25,0.95));display:flex;align-items:center;justify-content:center;flex-direction:column;z-index:9990;padding:24px;opacity:1;visibility:visible;transition:opacity 0.6s ease, visibility 0.6s ease;pointer-events:auto}
-    #welcome.hidden{opacity:0;visibility:hidden;pointer-events:none}
+    /* Welcome overlay - FIXED: proper exit animation, removed from DOM after transition */
+    #welcome{position:fixed;inset:0;background:linear-gradient(180deg, rgba(6,8,15,0.9), rgba(11,15,25,0.95));display:flex;align-items:center;justify-content:center;flex-direction:column;z-index:9990;padding:24px;opacity:1;visibility:visible;transition:opacity 0.5s ease, visibility 0.5s ease;pointer-events:auto}
+    #welcome.hidden{opacity:0;visibility:hidden;pointer-events:none;z-index:-1}
+    #welcome.removed{display:none !important}
     #welcome .title{font-size:clamp(28px,6vw,40px);letter-spacing:1px;color:var(--text);opacity:0;transform:translateY(12px);transition:all .8s cubic-bezier(.2,.9,.3,1)}
     #welcome.show .title{opacity:1;transform:none}
     #welcome h1{font-weight:700;font-size:clamp(44px,8vw,84px);margin-top:8px;background:linear-gradient(90deg,var(--primary),var(--secondary));-webkit-background-clip:text;background-clip:text;color:transparent}
@@ -60,8 +61,8 @@
     .enter-btn:hover{transform:translateY(-3px);box-shadow:0 16px 48px rgba(108,99,255,0.24)}
     .enter-btn:active{transform:translateY(-1px)}
 
-    /* Main layout */
-    main{position:relative;z-index:10;max-width:var(--max-width);margin:140px auto;padding:40px 28px;opacity:1;transition:opacity 0.6s ease}
+    /* Main layout - always visible, fully interactive */
+    main{position:relative;z-index:10;max-width:var(--max-width);margin:140px auto;padding:40px 28px;opacity:1;visibility:visible;pointer-events:auto;transition:opacity 0.5s ease;overflow-y:auto}
     main.hidden{opacity:0;pointer-events:none}
     .section{margin:60px 0;padding:28px;border-radius:var(--radius);backdrop-filter: blur(var(--card-blur));background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border:1px solid var(--glass-border);box-shadow:0 8px 40px rgba(3,6,20,0.6)}
 
@@ -399,6 +400,9 @@
         loader.classList.add('hide');
       }
 
+      // Prevent scroll during welcome screen
+      document.body.style.overflow = 'hidden';
+
       // Add animation to welcome title
       if (welcomeScreen) {
         setTimeout(() => {
@@ -406,19 +410,31 @@
         }, 100);
       }
 
-      // Enter button click handler
+      // Enter button click handler - makes portfolio visible and interactive
       function hideWelcomeScreen() {
         if (welcomeScreen) {
+          // Add hidden class to start fade transition
           welcomeScreen.classList.add('hidden');
-          if (main) main.classList.remove('hidden');
           
-          // Trigger animations on hero section
+          // Ensure main content is fully interactive
+          if (main) {
+            main.style.pointerEvents = 'auto';
+            main.style.opacity = '1';
+            main.style.visibility = 'visible';
+          }
+          
+          // After transition completes, remove element from DOM and restore scroll
           setTimeout(() => {
+            welcomeScreen.classList.add('removed');
+            document.body.style.overflow = 'auto';
+            window.scrollTo(0, 0);
+            
+            // Trigger animations on hero section
             const sections = document.querySelectorAll('[data-aos]');
             sections.forEach(section => {
               section.classList.add('aos-animate');
             });
-          }, 100);
+          }, 550);
         }
       }
 
